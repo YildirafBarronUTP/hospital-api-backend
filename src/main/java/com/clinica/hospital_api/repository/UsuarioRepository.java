@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    // Método personalizado para buscar si un correo ya existe en la base de datos
     Optional<Usuario> findByEmail(String email);
 }

@@ -14,16 +14,16 @@ public class TokenInvitacion {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String token; // Ej: "abc123xyz987"
+    private String token;
 
     @Column(nullable = false)
-    private String emailDestino; // A quién se lo enviamos
+    private String emailDestino;
 
     @Column(nullable = false)
-    private String rolAsignado; // Qué rol tendrá cuando acepte la invitación
+    private String rolAsignado;
 
     @Column(nullable = false)
-    private LocalDateTime fechaExpiracion; // Para que el link muera en 24 horas
+    private LocalDateTime fechaExpiracion;
 
-    private boolean usado = false; // Cambiará a true cuando el usuario cree su cuenta
+    private boolean usado = false;
 }

@@ -26,31 +26,25 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // 1. Extraemos el encabezado "Authorization" de la petición
         final String authHeader = request.getHeader("Authorization");
 
-        // 2. Verificamos si trae el token con el formato correcto ("Bearer xxxxx.yyyyy.zzzzz")
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7); // Cortamos la palabra "Bearer "
+            String token = authHeader.substring(7);
 
-            // 3. Si el token es válido y aún no hemos iniciado sesión en el contexto de Spring...
             if (jwtUtil.isTokenValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 String email = jwtUtil.extractEmail(token);
                 String rol = jwtUtil.extractRol(token);
 
-                // 4. Creamos los "permisos" oficiales para Spring Security
                 List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(rol));
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(email, null, authorities);
 
-                // 5. Le decimos a Spring: "Este usuario es legítimo, déjalo pasar".
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // 6. Continúa la cadena de filtros (pase el que pase, el guardia ya hizo su revisión)
         chain.doFilter(request, response);
     }
 }

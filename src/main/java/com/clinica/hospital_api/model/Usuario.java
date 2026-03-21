@@ -13,15 +13,14 @@ public class Usuario {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String email; // Usaremos el correo como nombre de usuario
+    private String email;
 
     @Column(nullable = false)
-    private String password; // Aquí irá el Hash (texto encriptado e ilegible), NUNCA la contraseña real
+    private String password;
 
     @Column(nullable = false)
-    private String rol; // Ej: ROLE_ADMIN, ROLE_DOCTOR, ROLE_RECEPCION
+    private String rol;
 
-    // Vinculamos este usuario de sistema con su perfil de empleado en recursos humanos
     @OneToOne
     @JoinColumn(name = "empleado_id")
     private Empleado empleado;

@@ -8,6 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface TokenInvitacionRepository extends JpaRepository<TokenInvitacion, Long> {
-    // Método para buscar si un token específico existe y es válido
     Optional<TokenInvitacion> findByToken(String token);
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     @Autowired
-    private JavaMailSender mailSender; // Esta es la herramienta que configuramos en application.properties
+    private JavaMailSender mailSender;
 
     public void enviarCorreo(String destinatario, String asunto, String cuerpo) {
         SimpleMailMessage mensaje = new SimpleMailMessage();
@@ -17,6 +17,6 @@ public class EmailService {
         mensaje.setSubject(asunto);
         mensaje.setText(cuerpo);
 
-        mailSender.send(mensaje); // ¡Se envía al mundo real!
+        mailSender.send(mensaje);
     }
 }

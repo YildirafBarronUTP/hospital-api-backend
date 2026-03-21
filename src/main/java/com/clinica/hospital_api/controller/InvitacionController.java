@@ -6,6 +6,7 @@ import com.clinica.hospital_api.repository.TokenInvitacionRepository;
 import com.clinica.hospital_api.repository.UsuarioRepository;
 import com.clinica.hospital_api.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/invitaciones")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${app.frontend.url}")
 public class InvitacionController {
 
     @Autowired
@@ -33,13 +34,14 @@ public class InvitacionController {
     @Autowired
     private EmailService emailService;
 
-    // 1. ENVIAR INVITACIÓN (Lo que ya hicimos)
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @PostMapping("/enviar")
     public ResponseEntity<?> enviarInvitacion(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String rol = request.get("rol");
 
-        // Validar si el usuario ya existe para no enviar invitaciones dobles
         if (usuarioRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya tiene una cuenta activa.");
         }
@@ -55,7 +57,7 @@ public class InvitacionController {
 
         tokenRepository.save(invitacion);
 
-        String enlaceRegistro = "http://localhost:3000/hospital/registro?token=" + tokenUnico;
+        String enlaceRegistro = frontendUrl + "/hospital/registro?token=" + tokenUnico;
         String asunto = "Invitación Segura - Clínica San Juan de Dios";
         String mensaje = "Hola,\n\nHas sido invitado a unirte al sistema de gestión de la Clínica San Juan con el nivel de acceso: " + rol + ".\n\nPara activar tu cuenta y crear tu contraseña segura, por favor haz clic en el siguiente enlace (Este enlace expirará en 24 horas):\n\n" + enlaceRegistro + "\n\nSaludos,\nEl equipo de Administración.";
 
@@ -64,13 +66,11 @@ public class InvitacionController {
         return ResponseEntity.ok("Invitación enviada correctamente");
     }
 
-    // 2. NUEVO: REGISTRAR AL USUARIO CON SU TOKEN
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody Map<String, String> request) {
         String token = request.get("token");
         String password = request.get("password");
 
-        // A. Buscamos el token en la base de datos
         Optional<TokenInvitacion> tokenOpt = tokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty()) {
@@ -79,7 +79,6 @@ public class InvitacionController {
 
         TokenInvitacion invitacion = tokenOpt.get();
 
-        // B. Reglas de Negocio: Validar estado del token
         if (invitacion.isUsado()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este enlace ya fue utilizado para crear una cuenta.");
         }
@@ -87,15 +86,13 @@ public class InvitacionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El enlace de invitación ha expirado.");
         }
 
-        // C. Todo está en orden, creamos el usuario en SQL Server
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setEmail(invitacion.getEmailDestino());
-        nuevoUsuario.setPassword(passwordEncoder.encode(password)); // ¡Siempre encriptado!
+        nuevoUsuario.setPassword(passwordEncoder.encode(password));
         nuevoUsuario.setRol(invitacion.getRolAsignado());
 
         usuarioRepository.save(nuevoUsuario);
 
-        // D. "Quemamos" el token para que no se pueda volver a usar
         invitacion.setUsado(true);
         tokenRepository.save(invitacion);
 

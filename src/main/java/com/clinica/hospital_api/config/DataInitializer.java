@@ -18,12 +18,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Al arrancar la app, verificamos si ya existe el usuario admin
         if (usuarioRepository.findByEmail("admin@sanjuan.com").isEmpty()) {
 
             Usuario admin = new Usuario();
             admin.setEmail("admin@sanjuan.com");
-            // Usamos BCrypt para encriptar la contraseña "Admin123!"
             admin.setPassword(passwordEncoder.encode("Admin123!"));
             admin.setRol("ROLE_ADMIN");
 

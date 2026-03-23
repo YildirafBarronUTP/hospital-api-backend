@@ -1,0 +1,23 @@
+package com.clinica.hospital_api.service;
+
+import com.clinica.hospital_api.model.Proveedor;
+import com.clinica.hospital_api.repository.ProveedorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProveedorService {
+
+    @Autowired
+    private ProveedorRepository proveedorRepository;
+
+    public List<Proveedor> listarTodos() {
+        return proveedorRepository.findAll();
+    }
+
+    public Proveedor guardar(Proveedor proveedor) {
+        return proveedorRepository.save(proveedor);
+    }
+}
